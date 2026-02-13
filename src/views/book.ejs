@@ -1,0 +1,43 @@
+<!doctype html>
+<html><body>
+<h1>Balendly Booking</h1>
+<form method="get" action="/book">
+  <input type="date" name="date" value="<%= date %>" />
+  <button>Datum laden</button>
+</form>
+<p>Timezone: <%= timezone %></p>
+<ul>
+  <% slots.forEach(function(slot) { %>
+    <li>
+      <button type="button" onclick='pickSlot(<%- JSON.stringify(slot) %>)'>
+        <%= new Date(slot.startLocal).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) %> -
+        <%= new Date(slot.endLocal).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) %>
+      </button>
+    </li>
+  <% }) %>
+</ul>
+
+<h2>Buchen</h2>
+<form id="bookForm">
+  <input name="firstName" placeholder="Vorname" required />
+  <input name="lastName" placeholder="Nachname" required />
+  <input name="company" placeholder="Firma" required />
+  <input name="postalCode" placeholder="PLZ" required />
+  <input name="email" type="email" placeholder="E-Mail" required />
+  <input name="phone" placeholder="Telefon" required />
+  <button>Buchen</button>
+</form>
+<pre id="result"></pre>
+<script>
+let selected=null;
+function pickSlot(slot){selected=slot;document.getElementById('result').innerText='Slot gewählt: '+slot.startLocal;}
+bookForm.addEventListener('submit', async (e)=>{
+ e.preventDefault();
+ if(!selected){alert('Bitte Slot wählen');return;}
+ const form=new FormData(bookForm);
+ const body={slotStartUtc:selected.startUtc,slotEndUtc:selected.endUtc,timezone:'<%= timezone %>',invitee:Object.fromEntries(form)};
+ const res=await fetch('/api/book',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+ document.getElementById('result').innerText=JSON.stringify(await res.json(),null,2);
+});
+</script>
+</body></html>

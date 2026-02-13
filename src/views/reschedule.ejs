@@ -1,0 +1,26 @@
+<!doctype html>
+<html><body>
+<h1>Termin verschieben</h1>
+<p>Aktuell: <%= booking.start_at_utc %> bis <%= booking.end_at_utc %> (UTC)</p>
+<form method="get">
+  <input type="hidden" name="token" value="<%= token %>" />
+  <input type="date" name="date" value="<%= date %>" />
+  <button>Datum laden</button>
+</form>
+<ul>
+  <% slots.forEach(function(slot) { %>
+    <li><button type="button" onclick='pickSlot(<%- JSON.stringify(slot) %>)'><%= new Date(slot.startLocal).toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}) %></button></li>
+  <% }) %>
+</ul>
+<button onclick="submitReschedule()">Verschiebung senden</button>
+<pre id="out"></pre>
+<script>
+let selected=null;
+function pickSlot(slot){selected=slot;out.innerText='Gewählt: '+slot.startLocal;}
+async function submitReschedule(){
+ if(!selected)return alert('Slot wählen');
+ const res=await fetch('/api/reschedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({bookingId:'<%= booking.id %>',token:'<%= token %>',slotStartUtc:selected.startUtc,slotEndUtc:selected.endUtc})});
+ out.innerText=JSON.stringify(await res.json(),null,2);
+}
+</script>
+</body></html>
