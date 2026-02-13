@@ -1,0 +1,17 @@
+<!doctype html>
+<html><body>
+<h1>Termin stornieren</h1>
+<p>Booking: <%= booking.id %></p>
+<button id="cancelBtn">Ja, stornieren</button>
+<pre id="out"></pre>
+<script>
+cancelBtn.onclick = async () => {
+  const res = await fetch('/api/cancel', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({ bookingId:'<%= booking.id %>', token:'<%= token %>' })
+  });
+  out.innerText = JSON.stringify(await res.json(), null, 2);
+};
+</script>
+</body></html>
